@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Job Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Job Portal</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Jobs</a>
+            <a href="interviews.html">Interviews</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="form-card">
+        <h2>Contact Us</h2>
+        <p>We would love to hear from you!</p>
+
+        <form id="contactForm">
+            <input type="text" placeholder="Your Name" required>
+            <input type="email" placeholder="Your Email" required>
+            <input type="text" placeholder="Subject" required>
+            <textarea placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById("contactForm")
+        .addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Thank you! Your message has been received.");
+            this.reset();
+        });
+    </script>
+
+</body>
+</html>

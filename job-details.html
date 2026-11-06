@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="portalFrame">
+
+    <title>Job Details | JobHub</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #FFF9DB !important;
+            color: #222222;
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 20px 40px;
+            background: #FFD700 !important;
+            border-bottom: 2px solid #222222;
+        }
+
+        nav a {
+            color: #222222 !important;
+            text-decoration: none;
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        nav a:hover {
+            border-bottom: 2px solid #222222;
+        }
+
+        /* Main Container */
+        .details-container {
+            max-width: 850px;
+            margin: 55px auto;
+            padding: 20px;
+        }
+
+        /* Job Card */
+        .job-details-card {
+            background: #FFFFFF;
+            color: #222222;
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+        }
+
+        .job-details-card h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #222222;
+        }
+
+        .company-name {
+            font-size: 19px;
+            font-weight: bold;
+            color: #9A7600;
+            margin-bottom: 25px;
+            padding-bottom: 18px;
+            border-bottom: 2px solid #FFE680;
+        }
+
+        /* Job Information */
+        .info-row {
+            display: flex;
+            gap: 15px;
+            padding: 16px 0;
+            border-bottom: 1px solid #EEEEEE;
+        }
+
+        .info-label {
+            width: 120px;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #222222;
+        }
+
+        /* Buttons */
+        .back-button {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: #222222;
+            color: #FFD700;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .back-button:hover {
+            background: #FFD700;
+            color: #222222;
+        }
+
+        /* Loading and Error */
+        .message {
+            text-align: center;
+            padding: 25px;
+            font-size: 18px;
+            color: #555555;
+        }
+
+        /* Responsive Design */
+        @media(max-width: 600px) {
+
+            nav {
+                padding: 15px;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .details-container {
+                margin: 25px auto;
+                padding: 15px;
+            }
+
+            .job-details-card {
+                padding: 22px;
+            }
+
+            .job-details-card h1 {
+                font-size: 24px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="/">Home</a>
+        <a href="/jobs">Browse Jobs</a>
+        <a href="/postjobs">Post Job</a>
+        <a href="/interviews">Interview Data</a>
+    </nav>
+
+    <!-- Job Details Section -->
+    <div class="details-container">
+
+        <div class="job-details-card" id="job-card">
+            <div class="message">Loading Job Details...</div>
+        </div>
+
+        <a href="/jobs" class="back-button">
+            ← Back to Jobs
+        </a>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+
+        const params = new URLSearchParams(window.location.search);
+
+        const id = params.get('id');
+
+        const card = document.getElementById('job-card');
+
+        async function loadJob() {
+
+            if (!id) {
+                card.innerHTML =
+                    '<div class="message">No job selected. Please select a job first.</div>';
+                return;
+            }
+
+            try {
+
+                const response = await fetch('/api/jobs/' + encodeURIComponent(id));
+
+                if (!response.ok) {
+                    throw new Error('Job not found');
+                }
+
+                const job = await response.json();
+
+                card.innerHTML = '';
+
+                // Job Title
+                const title = document.createElement('h1');
+                title.textContent = job.job_title || 'Job Title Not Available';
+                card.appendChild(title);
+
+                // Company Name
+                const company = document.createElement('div');
+                company.className = 'company-name';
+                company.textContent = job.company || 'Company Not Available';
+                card.appendChild(company);
+
+                // Job Information
+                const details = [
+                    ['Job ID', job.job_id],
+                    ['Location', job.location],
+                    ['Salary', job.salary],
+                    ['Skills', job.skills || job.skill]
+                ];
+
+                details.forEach(([label, value]) => {
+
+                    const row = document.createElement('div');
+                    row.className = 'info-row';
+
+                    const infoLabel = document.createElement('span');
+                    infoLabel.className = 'info-label';
+                    infoLabel.textContent = label;
+
+                    const infoValue = document.createElement('span');
+                    infoValue.className = 'info-value';
+                    infoValue.textContent = value || 'Not specified';
+
+                    row.appendChild(infoLabel);
+                    row.appendChild(infoValue);
+
+                    card.appendChild(row);
+
+                });
+
+            } catch (error) {
+
+                card.innerHTML =
+                    '<div class="message">Unable to load job details. Please check the job ID and server connection.</div>';
+
+                console.error(error);
+
+            }
+        }
+
+        loadJob();
+
+    </script>
+
+</body>
+</html>

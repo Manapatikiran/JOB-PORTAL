@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="portalFrame">
+  <title>Interview Data</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+    background: #FFF9DB !important;
+    color: #222222 !important;
+}
+
+nav {
+    background: #FFD700 !important;
+    border-bottom: 2px solid #222222 !important;
+}
+
+nav a {
+    color: #222222 !important;
+}
+
+.table-wrap {
+    background: #FFFFFF !important;
+}
+
+thead th {
+    background: #222222 !important;
+    color: #FFD700 !important;
+}
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="home.html">Home</a>
+    <a href="jobs.html">Jobs</a>
+    <a href="postjobs.html">Post Job</a>
+    <a href="interviews.html" class="active">Interview Data</a>
+    <a href="job-details.html">Contact</a>
+  </nav>
+
+  <div class="container">
+    <h1>Interview Data</h1>
+    <p class="subtitle">All scheduled and completed interviews</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Candidate</th><th>Job</th><th>Company</th>
+            <th>Date</th><th>Time</th><th>Round</th>
+            <th>Interviewer</th><th>Status</th><th>Feedback</th>
+          </tr>
+        </thead>
+        <tbody id="interview-body">
+          <tr><td colspan="10">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+  async function loadInterviews() {
+    const body = document.getElementById('interview-body');
+    try {
+      const res = await fetch('/api/interviews');
+      const text = await res.text();
+      if (!res.ok) throw new Error('Server replied ' + res.status + ': ' + text.slice(0, 200));
+
+      const data = JSON.parse(text);
+      body.innerHTML = '';
+
+      if (data.length === 0) {
+        body.innerHTML = '<tr><td colspan="10">No interviews found.</td></tr>';
+        return;
+      }
+
+      data.forEach(i => {
+        const date = i.interview_date ? String(i.interview_date).slice(0, 10) : '';
+        const time = i.interview_time ? String(i.interview_time).slice(0, 5) : '';
+        const tr = document.createElement('tr');
+
+        [i.interview_id, i.candidate_name, i.job_title, i.company, date, time,
+         i.round, i.interviewer].forEach(c => {
+          const td = document.createElement('td');
+          td.textContent = c;
+          tr.appendChild(td);
+        });
+
+        const statusTd = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'status ' + String(i.status || '').toLowerCase();
+        badge.textContent = i.status;
+        statusTd.appendChild(badge);
+        tr.appendChild(statusTd);
+
+        const fbTd = document.createElement('td');
+        fbTd.textContent = i.feedback || '-';
+        tr.appendChild(fbTd);
+
+        body.appendChild(tr);
+      });
+    } catch (e) {
+      body.innerHTML = '';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 10;
+      td.textContent = 'Failed to load interviews: ' + e.message;
+      tr.appendChild(td);
+      body.appendChild(tr);
+    }
+  }
+  loadInterviews();
+</script>
+</body>
+</html>
